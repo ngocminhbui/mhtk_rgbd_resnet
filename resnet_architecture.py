@@ -221,7 +221,7 @@ def bn(x, c):
 
     if c['use_bias']:
         bias = _get_variable('bias', params_shape,
-                             initializer=tf.zeros_initializer)
+                             initializer=tf.zeros_initializer())
         return x + bias
 
 
@@ -229,18 +229,18 @@ def bn(x, c):
 
     beta = _get_variable('beta',
                          params_shape,
-                         initializer=tf.zeros_initializer)
+                         initializer=tf.zeros_initializer())
     gamma = _get_variable('gamma',
                           params_shape,
-                          initializer=tf.ones_initializer)
+                          initializer=tf.ones_initializer())
 
     moving_mean = _get_variable('moving_mean',
                                 params_shape,
-                                initializer=tf.zeros_initializer,
+                                initializer=tf.zeros_initializer(),
                                 trainable=False)
     moving_variance = _get_variable('moving_variance',
                                     params_shape,
-                                    initializer=tf.ones_initializer,
+                                    initializer=tf.ones_initializer(),
                                     trainable=False)
 
     # These ops will only be preformed when training.
@@ -274,7 +274,7 @@ def fc(x, c):
                             weight_decay=FC_WEIGHT_STDDEV)
     biases = _get_variable('biases',
                            shape=[num_units_out],
-                           initializer=tf.zeros_initializer)
+                           initializer=tf.zeros_initializer())
     x = tf.nn.xw_plus_b(x, weights, biases)
     return x
 
