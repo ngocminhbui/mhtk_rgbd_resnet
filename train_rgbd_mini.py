@@ -11,7 +11,7 @@ tf.app.flags.DEFINE_string('eval_lst', './lists/eval_mini_1.lst', 'validation li
 tf.app.flags.DEFINE_string('log_dir', './log/mini_1','Directory where to write event logs and checkpoint.')
 
 tf.app.flags.DEFINE_string('dictionary', './lists/dictionary.lst', 'dictionary')
-tf.app.flags.DEFINE_string('data_dir', '/media/ngocminh/DATA/rgbd-dataset-processed-fringe','data dir')
+tf.app.flags.DEFINE_string('data_dir', '~/data/rgbd-dataset-processed-4dpng','data dir')
 
 
 tf.app.flags.DEFINE_float('learning_rate', 0.01, 'learning  rate.')
