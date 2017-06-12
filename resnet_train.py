@@ -81,7 +81,7 @@ def train(is_training, logits, images, labels):
         print 'resume', latest
         saver.restore(sess, latest)
     else:
-
+        '''
         print "Reloading weights for encoders..."
         net = np.load(FLAGS.pretrained_model).item()
         for v in tf.trainable_variables():
@@ -95,7 +95,8 @@ def train(is_training, logits, images, labels):
                 sess.run(v.assign(n_value))
             else:
                 print '\t%s is not reinitialized' % t_name
-
+        '''
+    print 'start training..'
     for x in xrange(FLAGS.max_steps + 1):
         start_time = time.time()
 

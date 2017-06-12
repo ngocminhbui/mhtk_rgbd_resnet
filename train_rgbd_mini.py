@@ -11,7 +11,7 @@ tf.app.flags.DEFINE_string('eval_lst', './lists/eval_mini_1.lst', 'validation li
 tf.app.flags.DEFINE_string('log_dir', './log/mini_1','Directory where to write event logs and checkpoint.')
 
 tf.app.flags.DEFINE_string('dictionary', './lists/dictionary.lst', 'dictionary')
-tf.app.flags.DEFINE_string('data_dir', '~/data/rgbd-dataset-processed-4dpng','data dir')
+tf.app.flags.DEFINE_string('data_dir', '/home/knmac/data/rgbd-dataset-processed-4dpng','data dir')
 
 
 tf.app.flags.DEFINE_float('learning_rate', 0.01, 'learning  rate.')
@@ -92,7 +92,7 @@ def main(_):
     is_training = tf.placeholder('bool', [], name='is_training')  # placeholder for the fusion part
 
     logits = inference(images,
-                       num_classes=1000,
+                       num_classes=FLAGS.num_classes,
                        is_training=True,
                        bottleneck=False,
                        num_blocks=[3, 4, 6, 3])
