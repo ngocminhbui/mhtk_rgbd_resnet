@@ -4,9 +4,9 @@ import time
 import sys
 
 from resnet_architecture import *
+from exp_config import *
 import tensorflow as tf
 
-MOMENTUM = 0.9
 FLAGS = tf.app.flags.FLAGS
 
 def top_k_error(predictions, labels, k):
@@ -49,7 +49,7 @@ def train(is_training, logits, images, labels):
 
     tf.summary.scalar('learning_rate', learning_rate)
 
-    opt = tf.train.MomentumOptimizer(learning_rate, MOMENTUM)
+    opt = tf.train.MomentumOptimizer(learning_rate, FLAGS.momentum)
     grads = opt.compute_gradients(loss_)
     for grad, var in grads:
         if grad is not None and not FLAGS.minimal_summaries:
@@ -77,12 +77,12 @@ def train(is_training, logits, images, labels):
     sess.run(init)
     tf.train.start_queue_runners(sess=sess)
 
-    summary_writer = tf.summary.FileWriter(FLAGS.log_dir, sess.graph)
+    summary_writer = tf.summary.FileWriter(FLAGS.train_dir, sess.graph)
 
     if FLAGS.resume:
-        latest = tf.train.latest_checkpoint(FLAGS.log_dir)
+        latest = tf.train.latest_checkpoint(FLAGS.train_dir)
         if not latest:
-            print 'No checkpoint to continue from in', FLAGS.log_dir
+            print 'No checkpoint to continue from in', FLAGS.train_dir
             sys.exit(1)
         print 'resume', latest
         saver.restore(sess, latest)
@@ -135,7 +135,7 @@ def train(is_training, logits, images, labels):
 
         # Save the model checkpoint periodically.
         if step > 1 and step % 500 == 0:
-            checkpoint_path = os.path.join(FLAGS.log_dir, 'model.ckpt')
+            checkpoint_path = os.path.join(FLAGS.train_dir, 'model.ckpt')
             saver.save(sess, checkpoint_path, global_step=global_step)
 
         # Run validation periodically

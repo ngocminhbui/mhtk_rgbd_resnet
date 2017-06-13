@@ -1,6 +1,5 @@
 from resnet_train import train
 from resnet_architecture import *
-from exp_config import *
 import tensorflow as tf
 import os
 
@@ -21,7 +20,6 @@ def load_data(data_dir, data_lst):
             "label_index": label_index
         })
     return data
-
 
 ''' Load input data using queue (feeding)'''
 
@@ -62,19 +60,3 @@ def distorted_inputs(data_dir, data_lst):
         min_after_dequeue=FLAGS.min_queue_examples)
 
     return image_batch, tf.reshape(label_batch, [FLAGS.batch_size])
-
-
-def main(_):
-    images, labels = distorted_inputs(FLAGS.data_dir, FLAGS.train_lst)
-
-    is_training = tf.placeholder('bool', [], name='is_training')  # placeholder for the fusion part
-
-    logits = inference(images,
-                       num_classes=FLAGS.num_classes,
-                       is_training=is_training,
-                       num_blocks=[3, 4, 6, 3])
-    train(is_training,logits, images, labels)
-
-
-if __name__ == '__main__':
-    tf.app.run(main)
