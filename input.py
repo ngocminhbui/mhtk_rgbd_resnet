@@ -35,6 +35,35 @@ def read_image_from_disk(input_queue):
 
     return example, label
 
+''' Non shuffle inputs , just for evaluation because of slow running  '''
+def inputs(data_dir, data_lst):
+    data = load_data(data_dir, data_lst)
+
+    filenames = [ d['filename'] for d in data ]
+    label_indexes = [ d['label_index'] for d in data ]
+
+    print filenames[4]
+
+    input_queue = tf.train.slice_input_producer([filenames, label_indexes], shuffle=False)
+
+    # read image and label from disk
+    image, label = read_image_from_disk(input_queue)
+
+    ''' Data Augmentation '''
+    image = tf.random_crop(image, [FLAGS.input_size, FLAGS.input_size, 4])
+    image = tf.image.random_flip_left_right(image)
+
+    # generate batch
+    image_batch, label_batch = tf.train.shuffle_batch(
+        [image, label],
+        batch_size=FLAGS.batch_size,
+        num_threads=1,
+        capacity=FLAGS.min_queue_examples + 3 * FLAGS.batch_size,
+        min_after_dequeue=FLAGS.min_queue_examples,
+        allow_smaller_final_batch=True)
+
+    return image_batch, tf.reshape(label_batch, [FLAGS.batch_size])
+
 
 def distorted_inputs(data_dir, data_lst,shuffle=True):
     data = load_data(data_dir, data_lst)
@@ -44,7 +73,7 @@ def distorted_inputs(data_dir, data_lst,shuffle=True):
 
     print filenames[4]
 
-    input_queue = tf.train.slice_input_producer([filenames, label_indexes], shuffle=False)
+    input_queue = tf.train.slice_input_producer([filenames, label_indexes], shuffle=shuffle)
 
     # read image and label from disk
     image, label = read_image_from_disk(input_queue)
