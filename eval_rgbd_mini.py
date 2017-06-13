@@ -2,23 +2,25 @@ import numpy as np
 from resnet_architecture import *
 import tensorflow as tf
 import os
-import datetime
+from datetime import datetime
 from exp_config import *
 from input import distorted_inputs
 
 FLAGS = tf.app.flags.FLAGS
 
 def top_k_error(predictions, labels, k):
-    batch_size = float(FLAGS.batch_size)  # tf.shape(predictions)[0]
+    batch_size =float(FLAGS.batch_size) # predictions.get_shape().as_list()[0]
     in_top1 = tf.to_float(tf.nn.in_top_k(predictions, labels, k=k))
     num_correct = tf.reduce_sum(in_top1)
     return (batch_size - num_correct) / batch_size
-
+def num_correct(predictions,labels,k):
+    in_top1 = tf.to_float(tf.nn.in_top_k(predictions, labels, k=k))
+    return tf.reduce_sum(in_top1)
 
 def evaluate(is_training, logits, images, labels):
     predictions = tf.nn.softmax(logits)
     top1_error = top_k_error(predictions, labels, 1)
-
+    top1_num_correct = num_correct(predictions,labels,1)
     saver = tf.train.Saver(tf.global_variables(), max_to_keep=20)
     summary_op = tf.summary.merge_all()
 
@@ -46,6 +48,7 @@ def evaluate(is_training, logits, images, labels):
     # evaluation
     coord = tf.train.Coordinator()
     data = None
+    nCorrect=0.0
     try:
         threads = []
         for qr in tf.get_collection(tf.GraphKeys.QUEUE_RUNNERS):
@@ -56,7 +59,7 @@ def evaluate(is_training, logits, images, labels):
         # total_sample_count = num_iter * FLAGS.batch_size
         step = 0
         while step < num_iter and not coord.should_stop():
-            top1_error_value, scores_, lbls_ = sess.run([top1_error, predictions, labels], {is_training: False})
+            top1_error_value,top1_num_correct_value,scores_, lbls_ = sess.run([top1_error,top1_num_correct, predictions, labels], {is_training: False})
             preds_ = scores_.argmax(axis=1)
             preds_ = np.expand_dims(preds_, axis=1)
             lbls_ = np.expand_dims(lbls_, axis=1)
@@ -67,13 +70,14 @@ def evaluate(is_training, logits, images, labels):
                 data = np.concatenate((data, tmp), axis=0)
             # _, top1_error_value = sess.run([val_op, top1_error], { is_training: False })
             precision += 1 - top1_error_value
+            nCorrect+=top1_num_correct_value
             # print('Validation top1 error %.2f' % top1_error_value)
             step += 1
 
         # precision
         precision /= num_iter
-        print '%s : precision = %.3f' % (datetime.now(), precision)
-
+        print '%s : precision = %.8f' % (datetime.now(), precision)
+        print '%s : precision = %.8f' % (datetime.now(),nCorrect/NUM_EXAMPLES)
         # write summary
         summary = tf.Summary()
         summary.ParseFromString(sess.run(summary_op, {is_training: False}))

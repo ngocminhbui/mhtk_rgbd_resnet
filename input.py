@@ -57,6 +57,7 @@ def distorted_inputs(data_dir, data_lst):
         batch_size=FLAGS.batch_size,
         num_threads=FLAGS.num_preprocess_threads,
         capacity=FLAGS.min_queue_examples + 3 * FLAGS.batch_size,
-        min_after_dequeue=FLAGS.min_queue_examples)
+        min_after_dequeue=FLAGS.min_queue_examples,
+        allow_smaller_final_batch=True)
 
     return image_batch, tf.reshape(label_batch, [FLAGS.batch_size])
