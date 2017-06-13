@@ -26,7 +26,6 @@ def train(is_training, logits, images, labels):
 
     loss_ = loss(logits, labels)
     predictions = tf.nn.softmax(logits)
-
     top1_error = top_k_error(predictions, labels, 1)
 
 
@@ -41,9 +40,16 @@ def train(is_training, logits, images, labels):
     top1_error_avg = ema.average(top1_error)
     tf.summary.scalar('val_top1_error_avg', top1_error_avg)
 
-    tf.summary.scalar('learning_rate', FLAGS.learning_rate)
+    learning_rate = tf.train.exponential_decay(FLAGS.starter_learning_rate,
+                                               global_step,
+                                               decay_steps=FLAGS.train_decay_steps,
+                                               decay_rate=FLAGS.train_decay_rate,
+                                               staircase=True)
 
-    opt = tf.train.MomentumOptimizer(FLAGS.learning_rate, MOMENTUM)
+
+    tf.summary.scalar('learning_rate', learning_rate)
+
+    opt = tf.train.MomentumOptimizer(learning_rate, MOMENTUM)
     grads = opt.compute_gradients(loss_)
     for grad, var in grads:
         if grad is not None and not FLAGS.minimal_summaries:
@@ -81,21 +87,23 @@ def train(is_training, logits, images, labels):
         print 'resume', latest
         saver.restore(sess, latest)
     else:
-        '''
+        print 'Restore from pretrained model..',FLAGS.pretrained_model
         print "Reloading weights for encoders..."
         net = np.load(FLAGS.pretrained_model).item()
         for v in tf.trainable_variables():
             t_name = v.name  # get name of tensor variable
 
             # get value of corresponding net
-            n_value = net[t_name]
-
+            if t_name in net.keys():
+                n_value = net[t_name]
+            else:
+                print 'Do not exist key ', t_name
             # avoid replacing variables with different shape (e.g. last fc layer)
             if tuple(v.get_shape().as_list()) == n_value.shape:
                 sess.run(v.assign(n_value))
             else:
                 print '\t%s is not reinitialized' % t_name
-        '''
+
     print 'start training..'
     for x in xrange(FLAGS.max_steps + 1):
         start_time = time.time()
@@ -134,6 +142,3 @@ def train(is_training, logits, images, labels):
         if step > 1 and step % 100 == 0:
             _, top1_error_value = sess.run([val_op, top1_error], { is_training: False })
             print('Validation top1 error %.2f' % top1_error_value)
-
-
-

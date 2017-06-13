@@ -12,13 +12,16 @@ tf.app.flags.DEFINE_string('log_dir', './log/mini_1','Directory where to write e
 
 tf.app.flags.DEFINE_string('dictionary', './lists/dictionary.lst', 'dictionary')
 tf.app.flags.DEFINE_string('data_dir', '/home/knmac/data/rgbd-dataset-processed-4dpng','data dir')
-
+#tf.app.flags.DEFINE_string('data_dir', '/media/ngocminh/DATA/rgbd-dataset-processed-4dpng','data dir')
 
 tf.app.flags.DEFINE_float('learning_rate', 0.01, 'learning  rate.')
 tf.app.flags.DEFINE_integer('batch_size', 16, 'batch size')
 tf.app.flags.DEFINE_integer('max_steps', 500000, 'max steps')
 tf.app.flags.DEFINE_boolean('resume', False, 'resume from latest saved state')
 tf.app.flags.DEFINE_boolean('minimal_summaries', True,'produce fewer summaries to save HD space')
+tf.app.flags.DEFINE_float('starter_learning_rate', 0.01, 'learning rate')
+tf.app.flags.DEFINE_float('train_decay_rate', 0.1, 'decay rate of training phase')
+tf.app.flags.DEFINE_integer('train_decay_steps', 10000, 'number of steps before decaying')
 
 
 tf.app.flags.DEFINE_integer('num_classes', 10, 'number of classes')
@@ -26,7 +29,7 @@ tf.app.flags.DEFINE_integer('input_size', 224, 'width and height of image')
 tf.app.flags.DEFINE_integer('num_preprocess_threads', 16, 'number of preprocess threads')
 tf.app.flags.DEFINE_integer('min_queue_examples', 20000, 'min after dequeue')
 
-tf.app.flags.DEFINE_string('pretrained_model', './model/ResNet-L50.ckpt', "Path of resnet pretrained model")
+tf.app.flags.DEFINE_string('pretrained_model', './model/ResNet-L50.npy', "Path of resnet pretrained model")
 
 ''' Load list of  {filename, label_name, label_index} '''
 def load_data(data_dir, data_lst):
@@ -93,8 +96,7 @@ def main(_):
 
     logits = inference(images,
                        num_classes=FLAGS.num_classes,
-                       is_training=True,
-                       bottleneck=False,
+                       is_training=is_training,
                        num_blocks=[3, 4, 6, 3])
     train(is_training,logits, images, labels)
 
