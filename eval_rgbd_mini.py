@@ -101,7 +101,7 @@ def main(_):
     NUM_EXAMPLES = len(open(FLAGS.eval_lst, 'r').read().splitlines())
 
 
-    images, labels = distorted_inputs(FLAGS.data_dir, FLAGS.eval_lst)
+    images, labels = distorted_inputs(FLAGS.data_dir, FLAGS.eval_lst,shuffle = False)
 
     is_training = tf.placeholder('bool', [], name='is_training')  # placeholder for the fusion part
 

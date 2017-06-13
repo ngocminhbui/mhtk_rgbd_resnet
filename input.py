@@ -36,13 +36,15 @@ def read_image_from_disk(input_queue):
     return example, label
 
 
-def distorted_inputs(data_dir, data_lst):
+def distorted_inputs(data_dir, data_lst,shuffle=True):
     data = load_data(data_dir, data_lst)
 
     filenames = [ d['filename'] for d in data ]
     label_indexes = [ d['label_index'] for d in data ]
 
-    input_queue = tf.train.slice_input_producer([filenames, label_indexes], shuffle=True)
+    print filenames[4]
+
+    input_queue = tf.train.slice_input_producer([filenames, label_indexes], shuffle=False)
 
     # read image and label from disk
     image, label = read_image_from_disk(input_queue)
